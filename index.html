@@ -16,7 +16,7 @@
         h1 {
             color: #007BFF;
         }
-        #current-station, #next-station {
+        #current-station, #next-station, #current-time {
             font-size: 24px;
             margin: 20px 0;
             padding: 15px;
@@ -47,15 +47,6 @@
             padding: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-         #current-time {
-            font-size: 24px;
-            margin: 20px 0;
-            padding: 15px;
-            border: 2px solid #007BFF;
-            border-radius: 5px;
-            background-color: #ffffff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
         #stop-list div {
             padding: 8px;
             border-bottom: 1px solid #ccc;
@@ -78,15 +69,23 @@
     <div id="next-station">Prochain arrêt : En attente...</div>
 
     <label for="direction">Choisissez le sens:</label>
-    <select id="direction" onchange="updateStops()">
+    <select id="direction" onchange="updateStops(); updateNextStation();">
         <option value="A">T1 - Rivière</option>
         <option value="F">T1 - Gare-Nus</option>
     </select>
 
     <div id="stop-list"></div>
-     <div id="current-time">Heure : En attente...</div>
+    <div id="current-time">Heure : En attente...</div>
+
+    <div>
+        <img src="https://tse1.mm.bing.net/th?id=OIP.UFiKhbm0O6R-KcylNyNBVwHaEq&pid=Api" style="width: 50%;">
+    </div>
+    <footer>
+        <p>STAS - Système d'aide à l'exploitation des transports publics</p>
+    </footer>
 
     <script>
+        // Mise à jour de l'heure
         function updateTime() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0'); // Format HH
@@ -95,40 +94,16 @@
             document.getElementById('current-time').innerText = `Heure : ${timeString}`;
         }
 
-        // Met à jour l'heure toutes les minutes
         setInterval(updateTime, 60000);
         updateTime(); // Appel initial pour afficher l'heure immédiatement
-    </script>
-  <div>
-    <img src="https://tse1.mm.bing.net/th?id=OIP.UFiKhbm0O6R-KcylNyNBVwHaEq&pid=Api" style="width: 50%;">
-</div>
-    <footer>
-        <p>STAS - Système d'aide à l'exploitation des transports publics</p>
-    </footer>
 
-    <script>
         // Données des stations avec une structure bi-sens
         const stations = [
-            {
-                "name": "Gare-Nus",
-                "location": { "lat": 4.1144166, "lng": 45.461 },
-            },
-            {
-                "name": "Bonsonnet",
-                "location": { "lat": 4.1185024, "lng": 45.4586619 },
-            },
-            {
-                "name": "Muret",
-                "location": { "lat": 4.1254495, "lng": 45.4618606 },
-            },
-            {
-                "name": "Confluences",
-                "location": { "lat": 4.1380147, "lng": 45.4595331 },
-            },
-            {
-                "name": "Rivière",
-                "location": { "lat": 4.1371571, "lng": 45.4573824 },
-            }
+            { "name": "Gare-Nus", "location": { "lat": 4.1144166, "lng": 45.461 }},
+            { "name": "Bonsonnet", "location": { "lat": 4.1185024, "lng": 45.4586619 }},
+            { "name": "Muret", "location": { "lat": 4.1254495, "lng": 45.4618606 }},
+            { "name": "Confluences", "location": { "lat": 4.1380147, "lng": 45.4595331 }},
+            { "name": "Rivière", "location": { "lat": 4.1371571, "lng": 45.4573824 }}
         ];
 
         let currentIndex = -1; // Indice de l'arrêt actuel
@@ -213,6 +188,7 @@
             const stopListDiv = document.getElementById('stop-list');
             stopListDiv.innerHTML = ''; // Effacer la liste existante
 
+            // Afficher les arrêts basés sur la direction
             stations.forEach(station => {
                 const stationDiv = document.createElement('div');
                 stationDiv.innerText = station.name;
