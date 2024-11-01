@@ -16,7 +16,7 @@
         h1 {
             color: #007BFF;
         }
-        #current-station, #next-station, #current-time {
+        #current-station, #next-station, #current-time, #current-position {
             font-size: 24px;
             margin: 20px 0;
             padding: 15px;
@@ -67,6 +67,7 @@
     <h1>Système d'Aide à l'Exploitation des Transports Publics</h1>
     <div id="current-station">Arrêt actuel : En attente...</div>
     <div id="next-station">Prochain arrêt : En attente...</div>
+    <div id="current-position">Position actuelle : En attente...</div>
 
     <label for="direction">Choisissez le sens:</label>
     <select id="direction" onchange="updateStops(); updateNextStation();">
@@ -120,6 +121,9 @@
                 lat: position.coords.latitude,
                 lng: position.coords.longitude
             };
+
+            // Afficher la position actuelle
+            document.getElementById('current-position').innerText = `Position actuelle : ${userLocation.lat.toFixed(6)}, ${userLocation.lng.toFixed(6)}`;
 
             // Trouver l'arrêt le plus proche
             const nearestStation = findNearestStation(userLocation);
