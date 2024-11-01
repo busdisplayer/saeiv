@@ -9,17 +9,56 @@
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1 {
+            color: #007BFF;
         }
         #current-station, #next-station {
             font-size: 24px;
             margin: 20px 0;
+            padding: 15px;
+            border: 2px solid #007BFF;
+            border-radius: 5px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        select {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #007BFF;
+            margin-bottom: 20px;
+            background-color: #ffffff;
         }
         #stop-list {
             margin: 20px 0;
             max-height: 200px;
             overflow-y: auto;
             border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #ffffff;
             padding: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        #stop-list div {
+            padding: 8px;
+            border-bottom: 1px solid #ccc;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #stop-list div:hover {
+            background-color: #e7f1ff;
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #777;
         }
     </style>
 </head>
@@ -35,6 +74,10 @@
     </select>
 
     <div id="stop-list"></div>
+
+    <footer>
+        <p>Mini SAEIV - Système d'aide à l'exploitation des transports publics</p>
+    </footer>
 
     <script>
         // Données des stations avec une structure bi-sens
