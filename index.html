@@ -10,12 +10,9 @@
             text-align: center;
             margin: 20px;
         }
-        #current-station {
+        #current-station, #next-station {
             font-size: 24px;
             margin: 20px 0;
-        }
-        #next-station {
-            font-size: 18px;
         }
         #stop-list {
             margin: 20px 0;
@@ -28,11 +25,11 @@
 </head>
 <body>
     <h1>Système d'Aide à l'Exploitation des Transports Publics</h1>
-    <div id="current-station">Localisation en cours...</div>
-    <div id="next-station"></div>
+    <div id="current-station">Arrêt actuel : En attente...</div>
+    <div id="next-station">Prochain arrêt : En attente...</div>
 
     <label for="direction">Choisissez le sens:</label>
-    <select id="direction" onchange="filterStops()">
+    <select id="direction" onchange="updateStops()">
         <option value="A">Vers Station A</option>
         <option value="F">Vers Station F</option>
     </select>
@@ -40,34 +37,31 @@
     <div id="stop-list"></div>
 
     <script>
-        // Données des stations
+        // Données des stations avec une structure bi-sens
         const stations = [
             {
                 "name": "Station A",
                 "location": { "lat": 48.8566, "lng": 2.3522 },
-                "direction": "A"
             },
             {
                 "name": "Station B",
                 "location": { "lat": 48.8570, "lng": 2.3530 },
-                "direction": "A"
             },
             {
                 "name": "Station C",
                 "location": { "lat": 48.8580, "lng": 2.3540 },
-                "direction": "F"
             },
             {
                 "name": "Station D",
                 "location": { "lat": 48.8590, "lng": 2.3550 },
-                "direction": "F"
             },
             {
                 "name": "Station F",
                 "location": { "lat": 48.8600, "lng": 2.3560 },
-                "direction": "F"
             }
         ];
+
+        let currentIndex = -1; // Indice de l'arrêt actuel
 
         // Vérification de la géolocalisation
         if (navigator.geolocation) {
@@ -82,17 +76,19 @@
                 lng: position.coords.longitude
             };
 
-            document.getElementById('current-station').innerText = `Votre position : ${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}`;
-
-            const nextStation = findNearestStation(userLocation);
-            if (nextStation) {
-                document.getElementById('next-station').innerText = `Prochaine station : ${nextStation.name}`;
+            // Trouver l'arrêt le plus proche
+            const nearestStation = findNearestStation(userLocation);
+            if (nearestStation) {
+                currentIndex = stations.findIndex(station => station.name === nearestStation.name);
+                document.getElementById('current-station').innerText = `Arrêt actuel : ${nearestStation.name}`;
+                updateNextStation();
             } else {
-                document.getElementById('next-station').innerText = "Aucune station à proximité.";
+                document.getElementById('current-station').innerText = "Aucun arrêt à proximité.";
+                document.getElementById('next-station').innerText = "Prochain arrêt : N/A";
             }
 
             // Afficher la liste des arrêts
-            displayStops();
+            updateStops();
         }
 
         function showError(error) {
@@ -142,22 +138,41 @@
             return degrees * (Math.PI / 180);
         }
 
-        function displayStops() {
+        function updateStops() {
             const selectedDirection = document.getElementById('direction').value;
             const stopListDiv = document.getElementById('stop-list');
             stopListDiv.innerHTML = ''; // Effacer la liste existante
 
-            const filteredStations = stations.filter(station => station.direction === selectedDirection);
-            filteredStations.forEach(station => {
+            stations.forEach(station => {
                 const stationDiv = document.createElement('div');
                 stationDiv.innerText = station.name;
                 stopListDiv.appendChild(stationDiv);
             });
         }
 
-        function filterStops() {
-            displayStops(); // Mettre à jour la liste des arrêts selon le sens sélectionné
+        function updateNextStation() {
+            const filteredStations = stations;
+
+            if (currentIndex !== -1) {
+                // Déterminer le prochain arrêt basé sur le sens
+                let nextIndex;
+                const direction = document.getElementById('direction').value;
+                if (direction === "A") {
+                    nextIndex = currentIndex + 1 < filteredStations.length ? currentIndex + 1 : -1;
+                } else {
+                    nextIndex = currentIndex - 1 >= 0 ? currentIndex - 1 : -1;
+                }
+
+                if (nextIndex !== -1) {
+                    document.getElementById('next-station').innerText = `Prochain arrêt : ${filteredStations[nextIndex].name}`;
+                } else {
+                    document.getElementById('next-station').innerText = "Prochain arrêt : N/A";
+                }
+            }
         }
+
+        // Appeler updateNextStation au changement de direction
+        document.getElementById('direction').addEventListener('change', updateNextStation);
     </script>
 </body>
 </html>
