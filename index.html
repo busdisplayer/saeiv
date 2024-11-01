@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini SAEIV</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        #current-station {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+        #next-station {
+            font-size: 18px;
+        }
+        #stop-list {
+            margin: 20px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Système d'Aide à l'Exploitation des Transports Publics</h1>
+    <div id="current-station">Localisation en cours...</div>
+    <div id="next-station"></div>
+
+    <label for="direction">Choisissez le sens:</label>
+    <select id="direction" onchange="filterStops()">
+        <option value="A">Vers Station A</option>
+        <option value="F">Vers Station F</option>
+    </select>
+
+    <div id="stop-list"></div>
+
+    <script>
+        // Données des stations
+        const stations = [
+            {
+                "name": "Station A",
+                "location": { "lat": 48.8566, "lng": 2.3522 },
+                "direction": "A"
+            },
+            {
+                "name": "Station B",
+                "location": { "lat": 48.8570, "lng": 2.3530 },
+                "direction": "A"
+            },
+            {
+                "name": "Station C",
+                "location": { "lat": 48.8580, "lng": 2.3540 },
+                "direction": "F"
+            },
+            {
+                "name": "Station D",
+                "location": { "lat": 48.8590, "lng": 2.3550 },
+                "direction": "F"
+            },
+            {
+                "name": "Station F",
+                "location": { "lat": 48.8600, "lng": 2.3560 },
+                "direction": "F"
+            }
+        ];
+
+        // Vérification de la géolocalisation
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(showPosition, showError);
+        } else {
+            alert("La géolocalisation n'est pas supportée par ce navigateur.");
+        }
+
+        function showPosition(position) {
+            const userLocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+
+            document.getElementById('current-station').innerText = `Votre position : ${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}`;
+
+            const nextStation = findNearestStation(userLocation);
+            if (nextStation) {
+                document.getElementById('next-station').innerText = `Prochaine station : ${nextStation.name}`;
+            } else {
+                document.getElementById('next-station').innerText = "Aucune station à proximité.";
+            }
+
+            // Afficher la liste des arrêts
+            displayStops();
+        }
+
+        function showError(error) {
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    alert("L'utilisateur a refusé la demande de géolocalisation.");
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert("Les informations de localisation ne sont pas disponibles.");
+                    break;
+                case error.TIMEOUT:
+                    alert("La demande de géolocalisation a expiré.");
+                    break;
+                case error.UNKNOWN_ERROR:
+                    alert("Une erreur inconnue s'est produite.");
+                    break;
+            }
+        }
+
+        function findNearestStation(userLocation) {
+            let nearestStation = null;
+            let nearestDistance = Infinity;
+
+            stations.forEach(station => {
+                const distance = calculateDistance(userLocation.lat, userLocation.lng, station.location.lat, station.location.lng);
+                if (distance < nearestDistance) {
+                    nearestDistance = distance;
+                    nearestStation = station;
+                }
+            });
+
+            return nearestStation;
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Rayon de la Terre en km
+            const dLat = degreesToRadians(lat2 - lat1);
+            const dLon = degreesToRadians(lon2 - lon1);
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(degreesToRadians(lat1)) * Math.cos(degreesToRadians(lat2)) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c; // Distance en km
+        }
+
+        function degreesToRadians(degrees) {
+            return degrees * (Math.PI / 180);
+        }
+
+        function displayStops() {
+            const selectedDirection = document.getElementById('direction').value;
+            const stopListDiv = document.getElementById('stop-list');
+            stopListDiv.innerHTML = ''; // Effacer la liste existante
+
+            const filteredStations = stations.filter(station => station.direction === selectedDirection);
+            filteredStations.forEach(station => {
+                const stationDiv = document.createElement('div');
+                stationDiv.innerText = station.name;
+                stopListDiv.appendChild(stationDiv);
+            });
+        }
+
+        function filterStops() {
+            displayStops(); // Mettre à jour la liste des arrêts selon le sens sélectionné
+        }
+    </script>
+</body>
+</html>
