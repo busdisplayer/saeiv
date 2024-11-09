@@ -60,6 +60,29 @@
                 transform: translateX(-100%);
             }
         }
+         .scrolling-panel {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            margin-top: 20px;
+        }
+        .scrolling-panel p {
+            display: inline-block;
+            animation: scroll 10s linear infinite;
+        }
+        @keyframes scroll {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(-100%);
+            }
+        }
     </style>
 </head>
 
@@ -85,8 +108,8 @@
 
     <!-- Informations sur la prochaine station -->
     <div class="w3-container w3-light-grey w3-padding" id="info">
-        <div class="scroll-container">
-            <p class="scroll-text" id="nextStation">Prochaine station : Aucune</p>
+        <div class="scrolling-panel">
+            <p id="nextStation">Prochaine station : Aucune</p>
         </div>
         <p id="distance">Distance : -- m</p>
     </div>
