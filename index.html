@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Société de Transport Nuçois (STN)</title>
+    <title>Société de Transport Nouvelle (STN)</title>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
@@ -18,7 +18,7 @@
 
     <!-- En-tête -->
     <div class="w3-container w3-blue w3-center">
-        <h2>Société de Transport Nuçois (STN)</h2>
+        <h2>Société de Transport Nouvelle (STN)</h2>
     </div>
 
     <!-- Sélection de la ligne -->
@@ -26,8 +26,8 @@
         <label for="lineSelect">Sélectionnez une ligne :</label>
         <select id="lineSelect" class="w3-select w3-border">
             <option value="">-- Choisissez une ligne --</option>
-            <option value="line1">Ligne 1 - Parcours Touristique</option>
-            <option value="line2">Ligne 2 - Balade en Bord de Seine</option>
+            <option value="line1">T1 - Rivière</option>
+            <option value="line2">T1 - Nus</option>
         </select>
     </div>
 
@@ -58,15 +58,25 @@
         // Données des lignes et arrêts
         const lines = {
             line1: [
-                { name: 'Louvre', lat: 48.8606, lon: 2.3376 },
-                { name: 'Notre-Dame', lat: 48.853, lon: 2.3499 },
-                { name: 'Bastille', lat: 48.8532, lon: 2.3694 }
-            ],
+    { "name": "Nus", "lat": 45.460900, "lon": 4.114471 },
+    { "name": "La Butte", "lat": 45.460012, "lon": 4.116388 },
+    { "name": "Gare de Saint-Maur", "lat": 45.458655, "lon": 4.118537 },
+    { "name": "Le Parc", "lat": 45.460825, "lon": 4.121913 },
+    { "name": "La Croix-Rouge", "lat": 45.461058, "lon": 4.130102 },
+    { "name": "Carrefour des Étoiles", "lat": 45.459547, "lon": 4.138128 },
+    { "name": "Les Amandiers", "lat": 45.458382, "lon": 4.136712 },
+    { "name": "Rivière d'Or", "lat": 45.457315, "lon": 4.136993 }
+],
             line2: [
-                { name: 'Tour Eiffel', lat: 48.8584, lon: 2.2945 },
-                { name: 'Pont de l\'Alma', lat: 48.8625, lon: 2.3032 },
-                { name: 'Musée d\'Orsay', lat: 48.860, lon: 2.3265 }
-            ]
+    { "name": "Rivière d'Or", "lat": 45.457315, "lon": 4.136993 },
+    { "name": "Les Arbres", "lat": 45.458052, "lon": 4.140616 },
+    { "name": "La Clairière", "lat": 45.457884, "lon": 4.145060 },
+    { "name": "Les Hauts de Lune", "lat": 45.458872, "lon": 4.143630 },
+    { "name": "Le Bosquet", "lat": 45.458382, "lon": 4.136712 },
+    { "name": "La Fontaine", "lat": 45.457884, "lon": 4.145060 },
+    { "name": "Les Cimes", "lat": 45.458872, "lon": 4.143630 },
+    { "name": "La Place des Lumières", "lat": 45.459547, "lon": 4.138128 }
+]
         };
 
         let currentLine = [];
