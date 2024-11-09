@@ -3,162 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAEIV Vélo - Navigation en Temps Réel</title>
+    <title>SAEIV Vélo - Guidage en Temps Réel</title>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
-        .map-container {
-            height: 50vh;
-            width: 100%;
-        }
-        .info {
-            padding: 10px;
-            font-size: 18px;
-        }
-        .line-buttons {
-            margin: 20px 0;
-        }
-        .blinking {
-            background-color: red;
-            border-radius: 50%;
-            width: 15px;
-            height: 15px;
-            animation: blink 1s infinite;
-        }
-        @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0; }
-            100% { opacity: 1; }
-        }
-        .stations-table {
-            width: 100%;
-            margin-top: 10px;
-        }
-        .stations-table th, .stations-table td {
-            padding: 5px;
-            text-align: left;
-        }
-        .night-mode {
-            background-color: #001f3f;
-            color: white;
-        }
+        #map { height: 70vh; margin: 20px 0; }
+        .blinking { animation: blinker 1s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+        .station-marker { color: blue; font-weight: bold; }
+        #info { margin-top: 10px; }
     </style>
 </head>
-<body class="w3-light-grey w3-large">
+<body>
 
-    <div class="w3-container w3-center">
-        <h2>SAEIV Vélo - Navigation en Temps Réel</h2>
-        <!-- Boutons de sélection des lignes -->
-        <div id="line-selection" class="line-buttons w3-padding"></div>
-        <button class="w3-button w3-round w3-blue" onclick="toggleNightMode()">Mode Nuit</button>
-        <div id="map" class="map-container w3-round w3-white"></div>
-        <div id="route-info" class="w3-padding w3-white w3-round w3-margin-top info"></div>
-        <table id="stations-table" class="w3-table w3-bordered w3-white w3-round stations-table"></table>
-        <h4>Historique des stations passées</h4>
-        <ul id="history" class="w3-ul w3-card-4"></ul>
+    <!-- En-tête -->
+    <div class="w3-container w3-blue w3-center">
+        <h2>SAEIV Vélo - Navigation et Guidage</h2>
     </div>
 
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <!-- Leaflet JS -->
+    <!-- Sélection de la ligne -->
+    <div class="w3-container w3-padding">
+        <label for="lineSelect">Sélectionnez une ligne :</label>
+        <select id="lineSelect" class="w3-select w3-border">
+            <option value="">-- Choisissez une ligne --</option>
+            <option value="line1">Ligne 1 - Parcours Touristique</option>
+            <option value="line2">Ligne 2 - Balade en Bord de Seine</option>
+        </select>
+    </div>
+
+    <!-- Carte interactive -->
+    <div id="map"></div>
+
+    <!-- Informations sur la prochaine station -->
+    <div class="w3-container w3-light-grey w3-padding" id="info">
+        <p id="nextStation">Prochaine station : Aucune</p>
+        <p id="distance">Distance : -- m</p>
+    </div>
+
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <!-- Leaflet Routing Machine -->
-    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
-
     <script>
-        // Arrêts prédéfinis pour chaque ligne
-        const stops = [
-            { id: 1, name: 'Station A', lat: 48.8566, lng: 2.3522 }, 
-            { id: 2, name: 'Station B', lat: 48.8606, lng: 2.3376 }, 
-            { id: 3, name: 'Station C', lat: 48.8656, lng: 2.3212 }, 
-            { id: 4, name: 'Station D', lat: 48.8706, lng: 2.3126 }, 
-            { id: 5, name: 'Station E', lat: 48.8756, lng: 2.3012 }  
-        ];
+        // Initialisation de la carte
+        var map = L.map('map').setView([48.8566, 2.3522], 13); // Centre sur Paris par défaut
 
-        const routes = [
-            { name: 'Ligne 1', stops: [1, 2, 3] },
-            { name: 'Ligne 2', stops: [3, 4, 5] }
-        ];
-
-        let currentPosition = null;
-        let currentStopIndex = 0;
-        let selectedRoute = null;
-        let mapMarkers = [];
-        let routingControl = null;
-        let userMarker = null;
-        let history = [];
-
-        const map = L.map('map').setView([48.8566, 2.3522], 13);
+        // Chargement des tuiles OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 18,
-            attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        function displayLineButtons() {
-            const lineSelectionDiv = document.getElementById('line-selection');
-            routes.forEach((route, index) => {
-                const button = document.createElement('button');
-                button.className = 'w3-button w3-round w3-white w3-margin-right';
-                button.innerText = route.name;
-                button.onclick = () => selectRoute(index);
-                lineSelectionDiv.appendChild(button);
-            });
-        }
+        // Marqueur pour la position de l'utilisateur
+        var userMarker = L.marker([0, 0], {
+            icon: L.divIcon({ className: 'blinking', html: '📍' })
+        }).addTo(map);
 
-        function selectRoute(routeIndex) {
-            selectedRoute = routes[routeIndex];
+        // Données des lignes et arrêts
+        const lines = {
+            line1: [
+                { name: 'Louvre', lat: 48.8606, lon: 2.3376 },
+                { name: 'Notre-Dame', lat: 48.853, lon: 2.3499 },
+                { name: 'Bastille', lat: 48.8532, lon: 2.3694 }
+            ],
+            line2: [
+                { name: 'Tour Eiffel', lat: 48.8584, lon: 2.2945 },
+                { name: 'Pont de l\'Alma', lat: 48.8625, lon: 2.3032 },
+                { name: 'Musée d\'Orsay', lat: 48.860, lon: 2.3265 }
+            ]
+        };
+
+        let currentLine = [];
+        let currentStopIndex = 0;
+
+        // Fonction pour afficher une ligne sur la carte
+        function displayLine(line) {
+            currentLine = line;
             currentStopIndex = 0;
-            updateMapForSelectedRoute();
-        }
-
-        function updateMapForSelectedRoute() {
-            if (routingControl) map.removeControl(routingControl);
-            const waypoints = selectedRoute.stops.map(id => {
-                const stop = stops.find(s => s.id === id);
-                return L.latLng(stop.lat, stop.lng);
-            });
-            routingControl = L.Routing.control({
-                waypoints,
-                routeWhileDragging: false,
-                createMarker: () => null,
-                lineOptions: { styles: [{ color: 'blue', opacity: 0.7, weight: 5 }] }
-            }).addTo(map);
-            displayStationsTable();
-        }
-
-        function displayStationsTable() {
-            const table = document.getElementById('stations-table');
-            table.innerHTML = '<tr><th>Station</th><th>Distance</th></tr>';
-            const { latitude, longitude } = currentPosition || {};
-            selectedRoute.stops.slice(currentStopIndex).forEach(stopId => {
-                const stop = stops.find(s => s.id === stopId);
-                const distance = currentPosition ? getDistance(latitude, longitude, stop.lat, stop.lng) : '-';
-                table.innerHTML += `<tr><td>${stop.name}</td><td>${Math.round(distance)}m</td></tr>`;
+            line.forEach(stop => {
+                L.marker([stop.lat, stop.lon], {
+                    icon: L.divIcon({ className: 'station-marker', html: '📍' + stop.name })
+                }).addTo(map);
             });
         }
 
-        function speak(message) {
-            const speech = new SpeechSynthesisUtterance(message);
-            speech.lang = 'fr-FR';
-            window.speechSynthesis.speak(speech);
+        // Sélection de la ligne
+        document.getElementById('lineSelect').addEventListener('change', function () {
+            const selectedLine = this.value;
+            if (selectedLine && lines[selectedLine]) {
+                map.setView([lines[selectedLine][0].lat, lines[selectedLine][0].lon], 13);
+                displayLine(lines[selectedLine]);
+                updateNextStop();
+            }
+        });
+
+        // Mise à jour de la prochaine station
+        function updateNextStop() {
+            if (currentLine.length > 0 && currentStopIndex < currentLine.length) {
+                const nextStop = currentLine[currentStopIndex];
+                document.getElementById('nextStation').innerText = `Prochaine station : ${nextStop.name}`;
+            }
         }
 
-        navigator.geolocation.watchPosition(position => {
-            const { latitude, longitude } = position.coords;
-            currentPosition = { latitude, longitude };
-
-            if (userMarker) map.removeLayer(userMarker);
-            userMarker = L.circleMarker([latitude, longitude], {
-                radius: 8, color: 'red', className: 'blinking'
-            }).addTo(map);
-
-            displayStationsTable();
-        }, console.error, { enableHighAccuracy: true });
-
-        function toggleNightMode() {
-            document.body.classList.toggle('night-mode');
+        // Fonction pour calculer la distance entre deux points
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371000; // Rayon de la Terre en mètres
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
         }
 
-        displayLineButtons();
+        // Suivi GPS en temps réel
+        function updateLocation(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            userMarker.setLatLng([lat, lon]);
+            map.setView([lat, lon], 15);
+
+            // Vérifier la distance jusqu'à la prochaine station
+            if (currentLine.length > 0 && currentStopIndex < currentLine.length) {
+                const nextStop = currentLine[currentStopIndex];
+                const distance = calculateDistance(lat, lon, nextStop.lat, nextStop.lon);
+                document.getElementById('distance').innerText = `Distance : ${Math.round(distance)} m`;
+
+                // Annonce vocale si à moins de 50 mètres
+                if (distance < 50) {
+                    speechSynthesis.speak(new SpeechSynthesisUtterance(`Vous approchez de la station ${nextStop.name}.`));
+                    currentStopIndex++;
+                    updateNextStop();
+                }
+            }
+        }
+
+        // Activer le suivi de la position
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(updateLocation);
+        } else {
+            alert("La géolocalisation n'est pas supportée par ce navigateur.");
+        }
     </script>
+
 </body>
 </html>
