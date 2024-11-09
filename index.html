@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,34 +8,30 @@
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
-        #map { height: 30vh; margin: 20px 0; }
-        .blinking { animation: blinker 1s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0; } }
-        .station-marker { color: blue; font-weight: bold; }
-        #info { margin-top: 10px; }
-    </style>
-</head>
-<body>
+        #map {
+            height: 30vh;
+            margin: 20px 0;
+        }
 
-    <!-- En-tête -->
-    <div class="w3-container w3-blue w3-center">
-        <h2>Société de Transport Nouvelle (STN)</h2>
-    </div>
+        .blinking {
+            animation: blinker 1s linear infinite;
+        }
 
-    <!-- Sélection de la ligne -->
-    <div class="w3-container w3-padding">
-        <label for="lineSelect">Sélectionnez une ligne :</label>
-        <select id="lineSelect" class="w3-select w3-border">
-            <option value="">-- Choisissez une ligne --</option>
-            <option value="line1">T1 - Rivière</option>
-            <option value="line2">T1 - Nus</option>
-        </select>
-    </div>
+        @keyframes blinker {
+            50% {
+                opacity: 0;
+            }
+        }
 
-    <!-- Carte interactive -->
-    <div id="map"></div>
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <style>
+        .station-marker {
+            color: blue;
+            font-weight: bold;
+        }
+
+        #info {
+            margin-top: 10px;
+        }
+
         /* Personnalisation du conteneur de texte */
         .scroll-container {
             width: 100%;
@@ -55,12 +52,36 @@
 
         /* Animation pour faire défiler le texte */
         @keyframes scroll-left {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
+            0% {
+                transform: translateX(100%);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
         }
     </style>
 </head>
+
 <body>
+
+    <!-- En-tête -->
+    <div class="w3-container w3-blue w3-center">
+        <h2>Société de Transport Nouvelle (STN)</h2>
+    </div>
+
+    <!-- Sélection de la ligne -->
+    <div class="w3-container w3-padding">
+        <label for="lineSelect">Sélectionnez une ligne :</label>
+        <select id="lineSelect" class="w3-select w3-border">
+            <option value="">-- Choisissez une ligne --</option>
+            <option value="line1">T1 - Rivière</option>
+            <option value="line2">T2 - Nus</option>
+        </select>
+    </div>
+
+    <!-- Carte interactive -->
+    <div id="map"></div>
 
     <!-- Informations sur la prochaine station -->
     <div class="w3-container w3-light-grey w3-padding" id="info">
@@ -73,7 +94,7 @@
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
         // Initialisation de la carte
-        var map = L.map('map').setView([48.8566, 2.3522],15); // Centre sur Paris par défaut
+        var map = L.map('map').setView([48.8566, 2.3522], 15); // Centre sur Paris par défaut
 
         // Chargement des tuiles OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -88,26 +109,26 @@
         // Données des lignes et arrêts
         const lines = {
             line1: [
-    { "name": "Nus", "lat": 45.460900, "lon": 4.114471 },
-    { "name": "La Butte", "lat": 45.460012, "lon": 4.116388 },
-    { "name": "Gare de Saint-Maur", "lat": 45.458655, "lon": 4.118537 },
-    { "name": "Le Parc", "lat": 45.460825, "lon": 4.121913 },
-    { "name": "La Croix-Rouge", "lat": 45.461058, "lon": 4.130102 },
-    { "name": "Carrefour des Étoiles", "lat": 45.459547, "lon": 4.138128 },
-    { "name": "Les Amandiers", "lat": 45.458382, "lon": 4.136712 },
-    { "name": "Rivière d'Or", "lat": 45.457315, "lon": 4.136993 }
-],
+                { "name": "Nus", "lat": 45.460900, "lon": 4.114471 },
+                { "name": "La Butte", "lat": 45.460012, "lon": 4.116388 },
+                { "name": "Gare de Saint-Maur", "lat": 45.458655, "lon": 4.118537 },
+                { "name": "Le Parc", "lat": 45.460825, "lon": 4.121913 },
+                { "name": "La Croix-Rouge", "lat": 45.461058, "lon": 4.130102 },
+                { "name": "Carrefour des Étoiles", "lat": 45.459547, "lon": 4.138128 },
+                { "name": "Les Amandiers", "lat": 45.458382, "lon": 4.136712 },
+                { "name": "Rivière d'Or", "lat": 45.457315, "lon": 4.136993 }
+            ],
             line2: [
                 { "name": "Rivière d'Or", "lat": 45.457315, "lon": 4.136993 },
-    { "name": "Les Arbres", "lat": 45.458052, "lon": 4.140616 },
-    { "name": "La Clairière", "lat": 45.457884, "lon": 4.145060 },
-    { "name": "Carrefour des Étoiles", "lat": 45.459547, "lon": 4.138128 },
-    { "name": "La Croix-Rouge", "lat": 45.461058, "lon": 4.130102 },
-    { "name": "Le Parc", "lat": 45.460825, "lon": 4.121913 },
-    { "name": "Gare de Saint-Maur", "lat": 45.458655, "lon": 4.118537 },
-    { "name": "La Butte", "lat": 45.460012, "lon": 4.116388 },
-    { "name": "Nus", "lat": 45.460900, "lon": 4.114471 }
-]
+                { "name": "Les Arbres", "lat": 45.458052, "lon": 4.140616 },
+                { "name": "La Clairière", "lat": 45.457884, "lon": 4.145060 },
+                { "name": "Carrefour des Étoiles", "lat": 45.459547, "lon": 4.138128 },
+                { "name": "La Croix-Rouge", "lat": 45.461058, "lon": 4.130102 },
+                { "name": "Le Parc", "lat": 45.460825, "lon": 4.121913 },
+                { "name": "Gare de Saint-Maur", "lat": 45.458655, "lon": 4.118537 },
+                { "name": "La Butte", "lat": 45.460012, "lon": 4.116388 },
+                { "name": "Nus", "lat": 45.460900, "lon": 4.114471 }
+            ]
         };
 
         let currentLine = [];
@@ -119,11 +140,11 @@
             currentStopIndex = 0;
             line.forEach(stop => {
                 L.marker([stop.lat, stop.lon], {
-                    icon: L.divIcon({ className: 'station-marker', html: '🚏' + stop.name })
+                    icon: L.divIcon({ className: 'station-marker', html: '🚏 ' + stop.name })
                 }).addTo(map);
             });
             drawRoute(line);  // Modification pour passer la ligne directement
-            generateStopTable(line);
+            updateNextStop();
         }
 
         function drawRoute(stops) {
@@ -162,7 +183,6 @@
             if (selectedLine && lines[selectedLine]) {
                 map.setView([lines[selectedLine][0].lat, lines[selectedLine][0].lon], 13);
                 displayLine(lines[selectedLine]);
-                updateNextStop();
             }
         });
 
@@ -215,9 +235,7 @@
             alert("La géolocalisation n'est pas supportée par ce navigateur.");
         }
     </script>
- 
-    
-   
 
 </body>
+
 </html>
