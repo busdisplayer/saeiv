@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAEIV Vélo</title>
+    <title>SAEIV Vélo - Navigation en Temps Réel</title>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <style>
         .map-container {
-            height: 40vh; /* Hauteur réduite */
+            height: 50vh;
             width: 100%;
         }
         .info {
@@ -15,7 +15,7 @@
             font-size: 18px;
         }
         .line-buttons {
-            margin: 10px 0;
+            margin: 20px 0;
         }
         .blinking {
             background-color: red;
@@ -37,17 +37,24 @@
             padding: 5px;
             text-align: left;
         }
+        .night-mode {
+            background-color: #001f3f;
+            color: white;
+        }
     </style>
 </head>
-<body class="w3-blue w3-large">
+<body class="w3-light-grey w3-large">
 
     <div class="w3-container w3-center">
-        <h2>SAEIV Vélo - Navigation en temps réel</h2>
+        <h2>SAEIV Vélo - Navigation en Temps Réel</h2>
         <!-- Boutons de sélection des lignes -->
         <div id="line-selection" class="line-buttons w3-padding"></div>
+        <button class="w3-button w3-round w3-blue" onclick="toggleNightMode()">Mode Nuit</button>
         <div id="map" class="map-container w3-round w3-white"></div>
         <div id="route-info" class="w3-padding w3-white w3-round w3-margin-top info"></div>
         <table id="stations-table" class="w3-table w3-bordered w3-white w3-round stations-table"></table>
+        <h4>Historique des stations passées</h4>
+        <ul id="history" class="w3-ul w3-card-4"></ul>
     </div>
 
     <!-- Leaflet CSS -->
@@ -58,16 +65,15 @@
     <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
 
     <script>
-        // Déclaration des arrêts pour chaque ligne
+        // Arrêts prédéfinis pour chaque ligne
         const stops = [
-            { id: 1, name: 'Station A', lat: 48.8566, lng: 2.3522 }, // Paris
-            { id: 2, name: 'Station B', lat: 48.8606, lng: 2.3376 }, // Louvre
-            { id: 3, name: 'Station C', lat: 48.8656, lng: 2.3212 }, // Champs-Élysées
-            { id: 4, name: 'Station D', lat: 48.8706, lng: 2.3126 }, // Arc de Triomphe
-            { id: 5, name: 'Station E', lat: 48.8756, lng: 2.3012 }  // La Défense
+            { id: 1, name: 'Station A', lat: 48.8566, lng: 2.3522 }, 
+            { id: 2, name: 'Station B', lat: 48.8606, lng: 2.3376 }, 
+            { id: 3, name: 'Station C', lat: 48.8656, lng: 2.3212 }, 
+            { id: 4, name: 'Station D', lat: 48.8706, lng: 2.3126 }, 
+            { id: 5, name: 'Station E', lat: 48.8756, lng: 2.3012 }  
         ];
 
-        // Déclaration des lignes
         const routes = [
             { name: 'Ligne 1', stops: [1, 2, 3] },
             { name: 'Ligne 2', stops: [3, 4, 5] }
@@ -79,35 +85,14 @@
         let mapMarkers = [];
         let routingControl = null;
         let userMarker = null;
+        let history = [];
 
-        // Initialisation de la carte avec Leaflet
         const map = L.map('map').setView([48.8566, 2.3522], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 18,
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        // Fonction de calcul de distance en mètres
-        function getDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3;
-            const φ1 = lat1 * Math.PI / 180;
-            const φ2 = lat2 * Math.PI / 180;
-            const Δφ = (lat2 - lat1) * Math.PI / 180;
-            const Δλ = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                      Math.cos(φ1) * Math.cos(φ2) *
-                      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        }
-
-        // Fonction de notification vocale
-        function speak(message) {
-            const speech = new SpeechSynthesisUtterance(message);
-            speech.lang = 'fr-FR';
-            window.speechSynthesis.speak(speech);
-        }
-
-        // Fonction pour afficher les boutons de sélection des lignes
         function displayLineButtons() {
             const lineSelectionDiv = document.getElementById('line-selection');
             routes.forEach((route, index) => {
@@ -119,36 +104,31 @@
             });
         }
 
-        // Fonction pour sélectionner une ligne
         function selectRoute(routeIndex) {
             selectedRoute = routes[routeIndex];
             currentStopIndex = 0;
             updateMapForSelectedRoute();
         }
 
-        // Mise à jour de la carte en fonction de la ligne sélectionnée
         function updateMapForSelectedRoute() {
-            mapMarkers.forEach(marker => map.removeLayer(marker));
-            mapMarkers = [];
-
-            const routeCoordinates = [];
-            selectedRoute.stops.forEach(stopId => {
-                const stop = stops.find(s => s.id === stopId);
-                const marker = L.marker([stop.lat, stop.lng]).addTo(map)
-                    .bindPopup(stop.name);
-                mapMarkers.push(marker);
-                routeCoordinates.push(L.latLng(stop.lat, stop.lng));
+            if (routingControl) map.removeControl(routingControl);
+            const waypoints = selectedRoute.stops.map(id => {
+                const stop = stops.find(s => s.id === id);
+                return L.latLng(stop.lat, stop.lng);
             });
-
+            routingControl = L.Routing.control({
+                waypoints,
+                routeWhileDragging: false,
+                createMarker: () => null,
+                lineOptions: { styles: [{ color: 'blue', opacity: 0.7, weight: 5 }] }
+            }).addTo(map);
             displayStationsTable();
         }
 
-        // Afficher le tableau des stations restantes
         function displayStationsTable() {
             const table = document.getElementById('stations-table');
             table.innerHTML = '<tr><th>Station</th><th>Distance</th></tr>';
             const { latitude, longitude } = currentPosition || {};
-
             selectedRoute.stops.slice(currentStopIndex).forEach(stopId => {
                 const stop = stops.find(s => s.id === stopId);
                 const distance = currentPosition ? getDistance(latitude, longitude, stop.lat, stop.lng) : '-';
@@ -156,7 +136,12 @@
             });
         }
 
-        // Suivi de la position
+        function speak(message) {
+            const speech = new SpeechSynthesisUtterance(message);
+            speech.lang = 'fr-FR';
+            window.speechSynthesis.speak(speech);
+        }
+
         navigator.geolocation.watchPosition(position => {
             const { latitude, longitude } = position.coords;
             currentPosition = { latitude, longitude };
@@ -167,12 +152,13 @@
             }).addTo(map);
 
             displayStationsTable();
-        }, error => console.error('Erreur de géolocalisation', error), {
-            enableHighAccuracy: true, timeout: 5000, maximumAge: 0
-        });
+        }, console.error, { enableHighAccuracy: true });
+
+        function toggleNightMode() {
+            document.body.classList.toggle('night-mode');
+        }
 
         displayLineButtons();
     </script>
-
 </body>
 </html>
