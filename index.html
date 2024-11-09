@@ -3,226 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAEIV STAS</title>
-    <link rel="shortcut icon" href="https://tse1.mm.bing.net/th?id=OIP.UFiKhbm0O6R-KcylNyNBVwHaEq&pid=Api">
+    <title>SAEIV Vélo</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
-            background-color: #f4f4f4;
-            color: #333;
+        .map-container {
+            height: 500px;
+            width: 100%;
         }
-        h1 {
-            color: #007BFF;
-        }
-        #current-station, #next-station, #current-time, #current-position {
-            font-size: 24px;
-            margin: 20px 0;
-            padding: 15px;
-            border: 2px solid #007BFF;
-            border-radius: 5px;
-            background-color: #ffffff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        label {
-            font-weight: bold;
-            margin-right: 10px;
-        }
-        select {
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #007BFF;
-            margin-bottom: 20px;
-            background-color: #ffffff;
-        }
-        #stop-list {
-            margin: 20px 0;
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #ffffff;
-            padding: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        #stop-list div {
-            padding: 8px;
-            border-bottom: 1px solid #ccc;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        #stop-list div:hover {
-            background-color: #e7f1ff;
-        }
-        footer {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #777;
+        .info {
+            font-size: 18px;
         }
     </style>
 </head>
-<body>
-    <h1>Système d'Aide à l'Exploitation des Transports Publics</h1>
-    <div id="current-station">Arrêt actuel : En attente...</div>
-    <div id="next-station">Prochain arrêt : En attente...</div>
-    <div id="current-position">Position actuelle : En attente...</div>
+<body class="w3-blue w3-large">
 
-    <label for="direction">Choisissez le sens:</label>
-    <select id="direction" onchange="updateStops(); updateNextStation();">
-        <option value="A">T1 - Rivière</option>
-        <option value="F">T1 - Gare-Nus</option>
-    </select>
-
-    <div id="stop-list"></div>
-    <div id="current-time">Heure : En attente...</div>
-
-    <div>
-        <img src="https://tse1.mm.bing.net/th?id=OIP.UFiKhbm0O6R-KcylNyNBVwHaEq&pid=Api" style="width: 50%;">
+    <div class="w3-container w3-center">
+        <h2>SAEIV Vélo - Navigation en temps réel</h2>
+        <div id="map" class="map-container w3-round w3-white"></div>
+        <div id="route-info" class="w3-padding w3-white w3-round w3-margin-top"></div>
     </div>
-    <footer>
-        <p>STAS - Système d'aide à l'exploitation des transports publics</p>
-    </footer>
 
     <script>
-        // Mise à jour de l'heure
-        function updateTime() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0'); // Format HH
-            const minutes = String(now.getMinutes()).padStart(2, '0'); // Format MM
-            const timeString = `${hours}h${minutes}`;
-            document.getElementById('current-time').innerText = `Heure : ${timeString}`;
-        }
-
-        setInterval(updateTime, 60000);
-        updateTime(); // Appel initial pour afficher l'heure immédiatement
-
-        // Données des stations avec une structure bi-sens
-        const stations = [
-            { "name": "Gare-Nus", "location": { "lat": 4.1144166, "lng": 45.461 }},
-            { "name": "Bonsonnet", "location": { "lat": 4.1185024, "lng": 45.4586619 }},
-            { "name": "Muret", "location": { "lat": 4.1254495, "lng": 45.4618606 }},
-            { "name": "Confluences", "location": { "lat": 4.1380147, "lng": 45.4595331 }},
-            { "name": "Rivière", "location": { "lat": 4.1371571, "lng": 45.4573824 }}
+        // Déclaration des arrêts
+        const stops = [
+            { id: 1, name: 'Station A', lat: 48.8566, lng: 2.3522 },
+            { id: 2, name: 'Station B', lat: 48.8606, lng: 2.3376 },
+            { id: 3, name: 'Station C', lat: 48.8656, lng: 2.3262 }
         ];
 
-        let currentIndex = -1; // Indice de l'arrêt actuel
+        // Déclaration des lignes
+        const routes = [
+            { name: 'Ligne 1', stops: [1, 2, 3] }
+        ];
 
-        // Vérification de la géolocalisation
-        if (navigator.geolocation) {
-            navigator.geolocation.watchPosition(showPosition, showError);
-        } else {
-            alert("La géolocalisation n'est pas supportée par ce navigateur.");
-        }
+        let currentPosition = null;
+        let currentStopIndex = 0;
 
-        function showPosition(position) {
-            const userLocation = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude
-            };
+        // Initialisation de la carte OpenStreetMap
+        const map = L.map('map').setView([48.8566, 2.3522], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
 
-            // Afficher la position actuelle
-            document.getElementById('current-position').innerText = `Position actuelle : ${userLocation.lat.toFixed(6)}, ${userLocation.lng.toFixed(6)}`;
+        // Marqueurs des arrêts
+        stops.forEach(stop => {
+            L.marker([stop.lat, stop.lng]).addTo(map).bindPopup(stop.name);
+        });
 
-            // Trouver l'arrêt le plus proche
-            const nearestStation = findNearestStation(userLocation);
-            if (nearestStation) {
-                currentIndex = stations.findIndex(station => station.name === nearestStation.name);
-                document.getElementById('current-station').innerText = `Arrêt actuel : ${nearestStation.name}`;
-                updateNextStation();
-            } else {
-                document.getElementById('current-station').innerText = "Aucun arrêt à proximité.";
-                document.getElementById('next-station').innerText = "Prochain arrêt : N/A";
-            }
-
-            // Afficher la liste des arrêts
-            updateStops();
-        }
-
-        function showError(error) {
-            switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    alert("L'utilisateur a refusé la demande de géolocalisation.");
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    alert("Les informations de localisation ne sont pas disponibles.");
-                    break;
-                case error.TIMEOUT:
-                    alert("La demande de géolocalisation a expiré.");
-                    break;
-                case error.UNKNOWN_ERROR:
-                    alert("Une erreur inconnue s'est produite.");
-                    break;
-            }
-        }
-
-        function findNearestStation(userLocation) {
-            let nearestStation = null;
-            let nearestDistance = Infinity;
-
-            stations.forEach(station => {
-                const distance = calculateDistance(userLocation.lat, userLocation.lng, station.location.lat, station.location.lng);
-                if (distance < nearestDistance) {
-                    nearestDistance = distance;
-                    nearestStation = station;
-                }
-            });
-
-            return nearestStation;
-        }
-
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371; // Rayon de la Terre en km
-            const dLat = degreesToRadians(lat2 - lat1);
-            const dLon = degreesToRadians(lon2 - lon1);
-            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                      Math.cos(degreesToRadians(lat1)) * Math.cos(degreesToRadians(lat2)) *
-                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        // Suivi de la position
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // mètre
+            const φ1 = lat1 * Math.PI / 180;
+            const φ2 = lat2 * Math.PI / 180;
+            const Δφ = (lat2 - lat1) * Math.PI / 180;
+            const Δλ = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c; // Distance en km
+            return R * c;
         }
 
-        function degreesToRadians(degrees) {
-            return degrees * (Math.PI / 180);
+        // Notification vocale
+        function speak(message) {
+            const speech = new SpeechSynthesisUtterance(message);
+            speech.lang = 'fr-FR';
+            window.speechSynthesis.speak(speech);
         }
 
-        function updateStops() {
-            const selectedDirection = document.getElementById('direction').value;
-            const stopListDiv = document.getElementById('stop-list');
-            stopListDiv.innerHTML = ''; // Effacer la liste existante
+        // Mise à jour de la position et calcul de la station suivante
+        navigator.geolocation.watchPosition(position => {
+            const { latitude, longitude } = position.coords;
+            currentPosition = [latitude, longitude];
+            L.marker(currentPosition).addTo(map).bindPopup('Vous êtes ici').openPopup();
+            map.setView(currentPosition, 13);
 
-            // Afficher les arrêts basés sur la direction
-            stations.forEach(station => {
-                const stationDiv = document.createElement('div');
-                stationDiv.innerText = station.name;
-                stopListDiv.appendChild(stationDiv);
-            });
-        }
-
-        function updateNextStation() {
-            const filteredStations = stations;
-
-            if (currentIndex !== -1) {
-                // Déterminer le prochain arrêt basé sur le sens
-                let nextIndex;
-                const direction = document.getElementById('direction').value;
-                if (direction === "A") {
-                    nextIndex = currentIndex + 1 < filteredStations.length ? currentIndex + 1 : -1;
-                } else {
-                    nextIndex = currentIndex - 1 >= 0 ? currentIndex - 1 : -1;
+            let minDistance = Infinity;
+            let closestStop = null;
+            stops.forEach(stop => {
+                const distance = getDistance(latitude, longitude, stop.lat, stop.lng);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestStop = stop;
                 }
+            });
 
-                if (nextIndex !== -1) {
-                    document.getElementById('next-station').innerText = `Prochain arrêt : ${filteredStations[nextIndex].name}`;
-                } else {
-                    document.getElementById('next-station').innerText = "Prochain arrêt : N/A";
+            if (closestStop) {
+                document.getElementById('route-info').innerHTML = `
+                    Prochaine station : ${closestStop.name} (${Math.round(minDistance)}m)
+                `;
+                if (minDistance < 5) {
+                    speak(`Vous êtes arrivé à la station ${closestStop.name}`);
+                    currentStopIndex++;
+                    if (currentStopIndex < routes[0].stops.length) {
+                        const nextStop = stops.find(s => s.id === routes[0].stops[currentStopIndex]);
+                        if (nextStop) {
+                            speak(`Prochaine station : ${nextStop.name}`);
+                        }
+                    }
                 }
             }
-        }
-
-        // Appeler updateNextStation au changement de direction
-        document.getElementById('direction').addEventListener('change', updateNextStation);
+        }, error => {
+            console.error('Erreur de géolocalisation', error);
+        }, {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+        });
     </script>
+
+    <!-- Inclusion des librairies Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
 </body>
 </html>
