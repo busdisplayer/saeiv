@@ -43,11 +43,11 @@
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
         // Initialisation de la carte
-        var map = L.map('map').setView([48.8566, 2.3522],5); // Centre sur Paris par défaut
+        var map = L.map('map').setView([48.8566, 2.3522],18); // Centre sur Paris par défaut
 
         // Chargement des tuiles OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 18,
+            maxZoom: 25,
         }).addTo(map);
 
         // Marqueur pour la position de l'utilisateur
