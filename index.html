@@ -52,7 +52,7 @@
 
         // Marqueur pour la position de l'utilisateur
         var userMarker = L.marker([0, 0], {
-            icon: L.divIcon({ className: 'blinking', html: '📍' })
+            icon: L.divIcon({ className: 'blinking', html: '🚊' })
         }).addTo(map);
 
         // Données des lignes et arrêts
@@ -78,7 +78,7 @@
             currentStopIndex = 0;
             line.forEach(stop => {
                 L.marker([stop.lat, stop.lon], {
-                    icon: L.divIcon({ className: 'station-marker', html: '📍' + stop.name })
+                    icon: L.divIcon({ className: 'station-marker', html: '🚏' + stop.name })
                 }).addTo(map);
             });
             drawRoute(line);  // Modification pour passer la ligne directement
