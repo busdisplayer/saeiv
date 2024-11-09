@@ -73,7 +73,7 @@
         }
         .scrolling-panel p {
             display: inline-block;
-            animation: scroll 10s linear infinite;
+            animation: scroll 5s linear infinite;
         }
         @keyframes scroll {
             from {
@@ -243,7 +243,7 @@
                 document.getElementById('distance').innerText = `Distance : ${Math.round(distance)} m`;
 
                 // Annonce vocale si à moins de 50 mètres
-                if (distance < 50) {
+                if (distance < 20) {
                     speechSynthesis.speak(new SpeechSynthesisUtterance(`Vous approchez de la station ${nextStop.name}.`));
                     currentStopIndex++;
                     updateNextStop();
