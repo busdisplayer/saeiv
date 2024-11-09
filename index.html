@@ -18,7 +18,7 @@
 
     <!-- En-tête -->
     <div class="w3-container w3-blue w3-center">
-        <h2>SAEIV Vélo - Navigation et Guidage</h2>
+        <h2>Société de Transport Nuçois (STN)</h2>
     </div>
 
     <!-- Sélection de la ligne -->
@@ -81,7 +81,7 @@
                     icon: L.divIcon({ className: 'station-marker', html: '📍' + stop.name })
                 }).addTo(map);
             });
-            drawRoute(line);
+            drawRoute(currentLine);
         }
         function drawRoute(tramStops) {
     if (tramStops.length < 2) return;
