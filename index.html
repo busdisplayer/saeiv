@@ -33,7 +33,7 @@
 
     <!-- Carte interactive -->
     <div id="map"></div>
- <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <style>
         /* Personnalisation du conteneur de texte */
         .scroll-container {
@@ -41,13 +41,15 @@
             height: 40px;
             overflow: hidden;
             border: 1px solid #000;
+            position: relative;
         }
 
         .scroll-text {
             font-size: 20px;
             font-weight: bold;
             line-height: 40px;
-            padding-left: 100%;
+            white-space: nowrap;
+            position: absolute;
             animation: scroll-left 5s linear infinite;
         }
 
@@ -57,10 +59,13 @@
             100% { transform: translateX(-100%); }
         }
     </style>
+</head>
+<body>
+
     <!-- Informations sur la prochaine station -->
     <div class="w3-container w3-light-grey w3-padding" id="info">
         <div class="scroll-container w3-center">
-        <p class="scroll-text" id="nextStation">Prochaine station : Aucune</p>
+            <p class="scroll-text" id="nextStation">Prochaine station : Aucune</p>
         </div>
         <p id="distance">Distance : -- m</p>
     </div>
