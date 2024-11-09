@@ -7,12 +7,15 @@
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <style>
         .map-container {
-            height: 70vh;
+            height: 60vh;
             width: 100%;
         }
         .info {
             padding: 10px;
             font-size: 18px;
+        }
+        .line-buttons {
+            margin: 10px 0;
         }
     </style>
 </head>
@@ -20,6 +23,8 @@
 
     <div class="w3-container w3-center">
         <h2>SAEIV Vélo - Navigation en temps réel</h2>
+        <!-- Boutons de sélection des lignes -->
+        <div id="line-selection" class="line-buttons w3-padding"></div>
         <div id="map" class="map-container w3-round w3-white"></div>
         <div id="route-info" class="w3-padding w3-white w3-round w3-margin-top info"></div>
     </div>
@@ -28,47 +33,36 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <!-- OSRM Routing JS -->
+    <!-- Leaflet Routing Machine -->
     <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
 
     <script>
-        // Déclaration des arrêts
+        // Déclaration des arrêts pour chaque ligne
         const stops = [
             { id: 1, name: 'Station A', lat: 48.8566, lng: 2.3522 }, // Paris
             { id: 2, name: 'Station B', lat: 48.8606, lng: 2.3376 }, // Louvre
             { id: 3, name: 'Station C', lat: 48.8656, lng: 2.3212 }, // Champs-Élysées
+            { id: 4, name: 'Station D', lat: 48.8706, lng: 2.3126 }, // Arc de Triomphe
+            { id: 5, name: 'Station E', lat: 48.8756, lng: 2.3012 }  // La Défense
         ];
 
         // Déclaration des lignes
-        const route = { name: 'Ligne 1', stops: [1, 2, 3] };
+        const routes = [
+            { name: 'Ligne 1', stops: [1, 2, 3] },
+            { name: 'Ligne 2', stops: [3, 4, 5] }
+        ];
 
         let currentPosition = null;
         let currentStopIndex = 0;
+        let selectedRoute = null;
+        let mapMarkers = [];
+        let routingControl = null;
 
         // Initialisation de la carte avec Leaflet
         const map = L.map('map').setView([48.8566, 2.3522], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 18,
             attribution: '© OpenStreetMap'
-        }).addTo(map);
-
-        // Marqueurs des arrêts
-        stops.forEach(stop => {
-            L.marker([stop.lat, stop.lng]).addTo(map)
-                .bindPopup(stop.name)
-                .openPopup();
-        });
-
-        // Afficher la route avec Leaflet Routing Machine
-        const routeCoordinates = route.stops.map(stopId => {
-            const stop = stops.find(s => s.id === stopId);
-            return L.latLng(stop.lat, stop.lng);
-        });
-        const routingControl = L.Routing.control({
-            waypoints: routeCoordinates,
-            routeWhileDragging: false,
-            show: false,
-            createMarker: () => null
         }).addTo(map);
 
         // Fonction de calcul de distance en mètres
@@ -92,44 +86,85 @@
             window.speechSynthesis.speak(speech);
         }
 
+        // Fonction pour afficher les boutons de sélection des lignes
+        function displayLineButtons() {
+            const lineSelectionDiv = document.getElementById('line-selection');
+            routes.forEach((route, index) => {
+                const button = document.createElement('button');
+                button.className = 'w3-button w3-round w3-white w3-margin-right';
+                button.innerText = route.name;
+                button.onclick = () => selectRoute(index);
+                lineSelectionDiv.appendChild(button);
+            });
+        }
+
+        // Fonction pour sélectionner une ligne
+        function selectRoute(routeIndex) {
+            selectedRoute = routes[routeIndex];
+            currentStopIndex = 0;
+            updateMapForSelectedRoute();
+        }
+
+        // Mise à jour de la carte en fonction de la ligne sélectionnée
+        function updateMapForSelectedRoute() {
+            // Nettoyer les anciens marqueurs et itinéraire
+            mapMarkers.forEach(marker => map.removeLayer(marker));
+            mapMarkers = [];
+            if (routingControl) {
+                map.removeControl(routingControl);
+            }
+
+            // Ajouter les marqueurs pour la ligne sélectionnée
+            const routeCoordinates = [];
+            selectedRoute.stops.forEach(stopId => {
+                const stop = stops.find(s => s.id === stopId);
+                const marker = L.marker([stop.lat, stop.lng]).addTo(map)
+                    .bindPopup(stop.name);
+                mapMarkers.push(marker);
+                routeCoordinates.push(L.latLng(stop.lat, stop.lng));
+            });
+
+            // Afficher la route
+            routingControl = L.Routing.control({
+                waypoints: routeCoordinates,
+                routeWhileDragging: false,
+                show: false,
+                createMarker: () => null
+            }).addTo(map);
+
+            // Centrer la carte sur la première station
+            map.setView([stops[0].lat, stops[0].lng], 13);
+        }
+
         // Suivi de la position de l'utilisateur
         navigator.geolocation.watchPosition(position => {
             const { latitude, longitude } = position.coords;
             currentPosition = [latitude, longitude];
 
-            // Mise à jour de la carte
-            L.marker(currentPosition).addTo(map).bindPopup('Vous êtes ici').openPopup();
+            // Mise à jour de la carte avec la position actuelle
+            const userMarker = L.marker(currentPosition).addTo(map).bindPopup('Vous êtes ici').openPopup();
+            mapMarkers.push(userMarker);
             map.setView(currentPosition, 13);
 
-            // Calcul de la distance avec les stations
-            let minDistance = Infinity;
-            let closestStop = null;
-            
-            stops.forEach(stop => {
-                const distance = getDistance(latitude, longitude, stop.lat, stop.lng);
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    closestStop = stop;
-                }
-            });
+            // Calcul de la distance à la prochaine station
+            if (selectedRoute) {
+                const nextStopId = selectedRoute.stops[currentStopIndex];
+                const nextStop = stops.find(s => s.id === nextStopId);
+                const distanceToNextStop = getDistance(latitude, longitude, nextStop.lat, nextStop.lng);
 
-            // Affichage des informations sur la station
-            if (closestStop) {
-                const remainingStops = stops.slice(currentStopIndex);
-                const nextStop = remainingStops[0];
-                
                 document.getElementById('route-info').innerHTML = `
-                    Prochaine station : ${nextStop.name} (${Math.round(minDistance)}m)
+                    Prochaine station : ${nextStop.name} (${Math.round(distanceToNextStop)}m)
                 `;
-                
-                if (minDistance < 5) {
+
+                // Annonce vocale si proche de la station
+                if (distanceToNextStop < 10) {
                     speak(`Vous êtes arrivé à la station ${nextStop.name}`);
                     currentStopIndex++;
-                    if (currentStopIndex < stops.length) {
-                        const upcomingStop = stops[currentStopIndex];
+                    if (currentStopIndex < selectedRoute.stops.length) {
+                        const upcomingStop = stops.find(s => s.id === selectedRoute.stops[currentStopIndex]);
                         speak(`Prochaine station : ${upcomingStop.name}`);
                     } else {
-                        speak('Vous êtes arrivé à votre destination finale.');
+                        speak('Vous avez atteint votre destination finale.');
                     }
                 }
             }
@@ -140,6 +175,9 @@
             timeout: 5000,
             maximumAge: 0
         });
+
+        // Initialisation
+        displayLineButtons();
     </script>
 
 </body>
