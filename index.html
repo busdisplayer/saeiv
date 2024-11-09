@@ -185,7 +185,7 @@
 
     <div id="tableContainer" class="table-container"></div>
     <script>
-    function generateStopTable(line) {
+    function generateStopTable(stops) {
             // Créer une table
             const table = document.createElement('table');
             
@@ -207,7 +207,7 @@
 
             // Créer le corps de la table
             const tbody = document.createElement('tbody');
-            line.forEach(stop => {
+            stops.forEach(stop => {
                 const row = document.createElement('tr');
                 const td1 = document.createElement('td');
                 td1.innerText = stop.name;
@@ -223,13 +223,12 @@
             });
             table.appendChild(tbody);
 
-            return table;
+            const tableContainer = document.getElementById('tableContainer');
+        tableContainer.appendChild(table);
         }
 
         // Générer le tableau pour la ligne 1 et l'ajouter au DOM
-        const tableContainer = document.getElementById('tableContainer');
-        const table = generateStopTable(lines.line1);
-        tableContainer.appendChild(table);
+        
     </script>    
    
 
