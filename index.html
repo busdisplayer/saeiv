@@ -81,37 +81,36 @@
                     icon: L.divIcon({ className: 'station-marker', html: '📍' + stop.name })
                 }).addTo(map);
             });
-            drawRoute(currentLine);
+            drawRoute(line);  // Modification pour passer la ligne directement
         }
-        function drawRoute(tramStops) {
-    if (tramStops.length < 2) return;
 
-    const coordinates = tramStops.map(stop => stop.position[1] + ',' + stop.position[0]).join(';');
-    const url = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson`;
+        function drawRoute(stops) {
+            if (stops.length < 2) return;
 
-    fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            if (window.routeLayer) {
-                map.removeLayer(window.routeLayer);
-            }
+            // Création de la route
+            const coordinates = stops.map(stop => `${stop.lon},${stop.lat}`).join(';');
+            const url = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson`;
 
-            const route = data.routes[0].geometry;
-            window.routeLayer = L.geoJSON(route, {
-                style: { color: 'blue', weight: 4, opacity: 0.7 }
-            }).addTo(map);
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (window.routeLayer) {
+                        map.removeLayer(window.routeLayer);
+                    }
 
-            // Afficher la durée totale du trajet
-            const duration = data.routes[0].duration;
-            const hours = Math.floor(duration / 3600);
-            const minutes = Math.floor((duration % 3600) / 60);
-            console.log(`Temps estimé : ${hours} heures et ${minutes} minutes`);
-        })
-        .catch(err => console.error('Erreur lors du calcul de l\'itinéraire : ', err));
-}
+                    const route = data.routes[0].geometry;
+                    window.routeLayer = L.geoJSON(route, {
+                        style: { color: 'blue', weight: 4, opacity: 0.7 }
+                    }).addTo(map);
 
-// Tracer l'itinéraire entre les arrêts
-
+                    // Afficher la durée totale du trajet
+                    const duration = data.routes[0].duration;
+                    const hours = Math.floor(duration / 3600);
+                    const minutes = Math.floor((duration % 3600) / 60);
+                    console.log(`Temps estimé : ${hours} heures et ${minutes} minutes`);
+                })
+                .catch(err => console.error('Erreur lors du calcul de l\'itinéraire : ', err));
+        }
 
         // Sélection de la ligne
         document.getElementById('lineSelect').addEventListener('change', function () {
