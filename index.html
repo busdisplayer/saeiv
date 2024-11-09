@@ -186,53 +186,7 @@
         }
     </script>
 
-    <div id="tableContainer" class="style="display:none" table-container"></div>
-    <script>
-    function generateStopTable(stops) {
-            // Créer une table
-            const table = document.createElement('table');
-            
-            // Créer l'en-tête de la table
-            const thead = document.createElement('thead');
-            const headerRow = document.createElement('tr');
-            const th1 = document.createElement('th');
-            th1.innerText = 'Nom de la Station';
-            const th2 = document.createElement('th');
-            th2.innerText = 'Latitude';
-            const th3 = document.createElement('th');
-            th3.innerText = 'Longitude';
-
-            headerRow.appendChild(th1);
-            headerRow.appendChild(th2);
-            headerRow.appendChild(th3);
-            thead.appendChild(headerRow);
-            table.appendChild(thead);
-
-            // Créer le corps de la table
-            const tbody = document.createElement('tbody');
-            stops.forEach(stop => {
-                const row = document.createElement('tr');
-                const td1 = document.createElement('td');
-                td1.innerText = stop.name;
-                const td2 = document.createElement('td');
-                td2.innerText = stop.lat;
-                const td3 = document.createElement('td');
-                td3.innerText = stop.lon;
-                
-                row.appendChild(td1);
-                row.appendChild(td2);
-                row.appendChild(td3);
-                tbody.appendChild(row);
-            });
-            table.appendChild(tbody);
-
-            const tableContainer = document.getElementById('tableContainer');
-        tableContainer.appendChild(table);
-        }
-
-        // Générer le tableau pour la ligne 1 et l'ajouter au DOM
-        
-    </script>    
+    
    
 
 </body>
