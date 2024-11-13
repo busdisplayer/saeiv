@@ -212,12 +212,12 @@
                 if (distance < 20) {
                     const utterance = new SpeechSynthesisUtterance(`Prochaine station ${nextStop.name}.`);
                     utterance.lang='fr-FR';
-                    speechSynthesis.speak(utterance);
+                    window.speechSynthesis.speak(utterance);
                 }
                  if (distance < 5) {
                     const utterance = new SpeechSynthesisUtterance(`Station : ${nextStop.name}.`);
                     utterance.lang='fr-FR';
-                    speechSynthesis.speak(utterance);
+                    window.speechSynthesis.speak(utterance);
                     currentStopIndex++;
                     updateNextStop();
                 }
@@ -257,7 +257,7 @@
 function startSpeech() {
      const utterance = new SpeechSynthesisUtterance(`Démarrage du logiciel d'Aide à l'Exploitation`);
                     utterance.lang='fr-FR';
-                    speechSynthesis.speak(utterance);
+                    window.speechSynthesis.speak(utterance);
 }
         startSpeech();
     </script>
