@@ -378,7 +378,55 @@ function startSpeech() {
         }
     }
 </script>
+<div id="battery-container" style="width: 250px; height: 50px; background-color: #e0e0e0; border-radius: 10px; position: relative; margin: 50px auto; border: 2px solid #ccc;">
+    <div style="height: 100%; width: 100%; border-radius: 10px; background-color: #ccc; position: relative;">
+        <div id="batteryLevel" style="height: 100%; border-radius: 8px; background-color: green; transition: width 1s ease;"></div>
+        <div id="batteryText" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: bold;">100%</div>
+    </div>
+</div>
 
+<script>
+    // Constantes
+    const batteryKey = 'batteryLevel';
+    const maxBattery = 100;
+    const minBattery = 0;
+    let batteryLevel = localStorage.getItem(batteryKey) ? parseInt(localStorage.getItem(batteryKey)) : maxBattery;
+
+    // Mise à jour du niveau de batterie
+    function updateBattery() {
+        // Vérification de la date pour recharge automatique
+        const currentDate = new Date().toLocaleDateString();
+        const lastUpdateDate = localStorage.getItem('lastUpdateDate');
+
+        if (lastUpdateDate !== currentDate) {
+            // Recharger la batterie au début de chaque jour
+            batteryLevel = maxBattery;
+            localStorage.setItem(batteryKey, batteryLevel);
+            localStorage.setItem('lastUpdateDate', currentDate);
+        } else {
+            // Diminuer la batterie de 1% chaque minute
+            batteryLevel = Math.max(minBattery, batteryLevel - 1);
+            localStorage.setItem(batteryKey, batteryLevel);
+        }
+
+        // Mise à jour de l'affichage de la batterie
+        const batteryLevelDiv = document.getElementById('batteryLevel');
+        const batteryTextDiv = document.getElementById('batteryText');
+        batteryLevelDiv.style.width = batteryLevel + '%';
+        batteryTextDiv.textContent = batteryLevel + '%';
+
+        // Si la batterie est vide, alerter
+        if (batteryLevel <= minBattery) {
+            alert("La batterie est vide ! Veuillez la recharger.");
+        }
+    }
+
+    // Actualisation chaque minute
+    setInterval(updateBattery, 60000); // chaque minute
+
+    // Initialisation au chargement de la page
+    window.onload = updateBattery;
+</script>
 
 </body>
 
