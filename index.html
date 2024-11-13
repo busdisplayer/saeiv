@@ -253,7 +253,12 @@
             break;
     }
 }
-
+function startSpeech() {
+     const utterance = new SpeechSynthesisUtterance(`Démarrage du logiciel d'Aide à l'Exploitation`);
+                    utterance.lang='fr-FR';
+                    speechSynthesis.speak(utterance);
+}
+        startSpeech();
     </script>
 
 </body>
