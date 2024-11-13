@@ -28,38 +28,6 @@
             font-weight: bold;
         }
 
-        #info {
-            margin-top: 10px;
-        }
-
-        /* Personnalisation du conteneur de texte */
-        .scroll-container {
-            width: 100%;
-            height: 40px;
-            overflow: hidden;
-            border: 1px solid #000;
-            position: relative;
-        }
-
-        .scroll-text {
-            font-size: 20px;
-            font-weight: bold;
-            line-height: 40px;
-            white-space: nowrap;
-            position: absolute;
-            animation: scroll-left 5s linear infinite;
-        }
-
-        /* Animation pour faire défiler le texte */
-        @keyframes scroll-left {
-            0% {
-                transform: translateX(100%);
-            }
-
-            100% {
-                transform: translateX(-100%);
-            }
-        }
          .scrolling-panel {
             background-color: #007bff;
             color: white;
@@ -241,7 +209,12 @@
 
                 // Annonce vocale si à moins de 50 mètres
                 if (distance < 20) {
-                    const utterance = new SpeechSynthesisUtterance(`Vous approchez de la station ${nextStop.name}.`);
+                    const utterance = new SpeechSynthesisUtterance(`Prochaine station ${nextStop.name}.`);
+                    utterance.lang='fr-FR';
+                    speechSynthesis.speak(utterance);
+                }
+                 if (distance < 5) {
+                    const utterance = new SpeechSynthesisUtterance(`Station : ${nextStop.name}.`);
                     utterance.lang='fr-FR';
                     speechSynthesis.speak(utterance);
                     currentStopIndex++;
