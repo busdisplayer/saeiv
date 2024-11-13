@@ -241,7 +241,9 @@
 
                 // Annonce vocale si à moins de 50 mètres
                 if (distance < 20) {
-                    speechSynthesis.speak(new SpeechSynthesisUtterance(`Vous approchez de la station ${nextStop.name}.`));
+                    const utterance = new SpeechSynthesisUtterance(`Vous approchez de la station ${nextStop.name}.`);
+                    utterance.lang='fr-FR';
+                    speechSynthesis.speak(utterance);
                     currentStopIndex++;
                     updateNextStop();
                 }
