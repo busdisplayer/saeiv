@@ -202,7 +202,6 @@
         document.getElementById('lineSelect').addEventListener('change', function () {
             const selectedLine = this.value;
             if (selectedLine && lines[selectedLine]) {
-                map.setView([lines[selectedLine][0].lat, lines[selectedLine][0].lon], 13);
                 displayLine(lines[selectedLine]);
             }
         });
