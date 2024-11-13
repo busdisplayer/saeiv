@@ -199,7 +199,7 @@
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
             userMarker.setLatLng([lat, lon]);
-            map.setView([lat, lon], 20);
+            map.setView([lat, lon], 15);
 
             // Vérifier la distance jusqu'à la prochaine station
             if (currentLine.length > 0 && currentStopIndex < currentLine.length) {
