@@ -225,11 +225,13 @@
 
         // Activer le suivi de la position
         if (navigator.geolocation) {
-            navigator.geolocation.watchPosition(updateLocation,{
-                enableHighAccuracy: true,
-                timeout: 5000,
-                maximumAge:0
-            });
+            navigator.geolocation.watchPosition(updateLocation,
+               {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+        }
+            );
         } else {
             alert("La géolocalisation n'est pas supportée par ce navigateur.");
         }
