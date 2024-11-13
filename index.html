@@ -113,6 +113,7 @@
             ],
             line2: [
                 { "name": "Rivière d'Or", "lat": 45.457315, "lon": 4.136993 },
+                { "name": "Les Amandiers", "lat": 45.458382, "lon": 4.136712 },
                 { "name": "Carrefour des Étoiles", "lat": 45.459547, "lon": 4.138128 },
                 { "name": "La Croix-Rouge", "lat": 45.461058, "lon": 4.130102 },
                 { "name": "Le Parc", "lat": 45.460825, "lon": 4.121913 },
@@ -262,6 +263,122 @@ function startSpeech() {
 }
         startSpeech();
     </script>
+    <!-- Conteneur des boutons et des portes -->
+<div class="button-container">
+    <!-- Bouton pour contacter le dépôt -->
+    <button class="w3-button w3-blue w3-round w3-large" onclick="alert('Contactez le dépôt via radio.');">
+        CONTACTER DÉPÔT
+    </button>
+
+    <!-- Bouton pour contacter les contrôleurs -->
+    <button class="w3-button w3-green w3-round w3-large" onclick="alert('Contrôleurs à bord informés.');">
+        CONTRÔLEURS À BORD
+    </button>
+
+    <!-- Bouton pour ouvrir/fermer les portes -->
+    <button class="w3-button w3-red w3-round w3-large" onclick="toggleDoors()">
+        OUVRIR / FERMER LES PORTES
+    </button>
+</div>
+
+<!-- Simulation des portes -->
+<div class="door" id="door">
+    <div class="left-door"></div>
+    <div class="right-door"></div>
+    <div class="door-label">PORTES</div>
+</div>
+
+<!-- Styles pour les boutons et les portes -->
+<style>
+    .button-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+        margin-top: 30px;
+    }
+
+    .door {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 20px auto;
+        width: 250px;
+        height: 120px;
+        background-color: lightblue;
+        position: relative;
+        overflow: hidden;
+        border-radius: 10px;
+        border: 3px solid black; /* Contour noir pour l'extérieur */
+    }
+
+    .left-door,
+    .right-door {
+        width: 50%;
+        height: 100%;
+        background-color: green; /* Portes vertes */
+        position: absolute;
+        transition: transform 2s ease-in-out; /* Animation plus lente */
+        border: 3px solid black; /* Contour noir pour les portes */
+    }
+
+    .left-door {
+        left: 0;
+    }
+
+    .right-door {
+        right: 0;
+    }
+
+    .door.open .left-door {
+        transform: translateX(-100%);
+    }
+
+    .door.open .right-door {
+        transform: translateX(100%);
+    }
+
+    .door-label {
+        position: absolute;
+        color: white;
+        font-weight: bold;
+        font-size: 18px;
+        text-shadow: 1px 1px 3px black;
+    }
+
+    .blinking {
+        animation: blink-red 0.5s step-start 6; /* Clignote en rouge 3 fois */
+    }
+
+    @keyframes blink-red {
+        50% {
+            background-color: red;
+        }
+    }
+</style>
+
+<!-- Script JavaScript pour gérer l'ouverture et la fermeture des portes -->
+<script>
+    function toggleDoors() {
+        const door = document.getElementById('door');
+        
+        // Si les portes sont en train de s'ouvrir ou sont ouvertes
+        if (door.classList.contains('open')) {
+            // Ajouter l'effet de clignotement
+            door.classList.add('blinking');
+            
+            // Attendre que le clignotement se termine avant de fermer les portes
+            setTimeout(() => {
+                door.classList.remove('blinking');
+                door.classList.remove('open');
+            }, 3000); // 6 clignotements à 0.5s chacun = 3s
+        } else {
+            // Ouvrir les portes
+            door.classList.add('open');
+        }
+    }
+</script>
+
 
 </body>
 
