@@ -205,7 +205,7 @@ function displayLine(line) {
                 // Interpolation entre les deux positions pour un mouvement fluide
                 const latDiff = nextPos.lat - currentPos.lat;
                 const lonDiff = nextPos.lon - currentPos.lon;
-                const step = 0.01; // Vitesse de l'interpolation
+                const step = 0.1; // Vitesse de l'interpolation
 
                 // Calcul de la nouvelle position du tram
                 const newLat = currentPos.lat + latDiff * step;
