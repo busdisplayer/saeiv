@@ -183,7 +183,7 @@ function displayLine(line) {
             }).addTo(map);
 
             // Ajouter un popup avec l'ID du tram
-            tramMarker.bindPopup(`<b>Tram ${tramId}</b><br>Arrêt : ${lineCoords[startIndex].lat}, ${lineCoords[startIndex].lon}`;
+            tramMarker.bindPopup(`<b>Tram ${tramId}</b><br>Arrêt : ${lineCoords[startIndex].lat}, ${lineCoords[startIndex].lon}`);
 
             return tramMarker;
         }
