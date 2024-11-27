@@ -271,7 +271,9 @@ function startSpeech() {
     </button>
 
     <!-- Bouton pour contacter les contrôleurs -->
-    <button class="w3-button w3-green w3-round w3-large" onclick="alert('Contrôleurs à bord informés.');">
+    <button class="w3-button w3-green w3-round w3-large" onclick="alert('Contrôleurs à bord informés.');  const utterance = new SpeechSynthesisUtterance(`Chers voyageurs, des contrôles sont en cours sur votre ligne, veuillez présenter vos titres, cartes ! merci`);
+                    // utterance.lang='fr-FR';
+                    window.speechSynthesis.speak(utterance);">
         CONTRÔLEURS À BORD
     </button>
 
