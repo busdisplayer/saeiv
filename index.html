@@ -185,6 +185,12 @@
                 const nextStop = currentLine[currentStopIndex];
                 document.getElementById('nextStation').innerText = `Prochaine station : ${nextStop.name}`;
             }
+            if (currentLine.length == currentStopIndex) {
+                document.getElementById('nextStation').innerText = `NON COMMERCIAL`;
+                const utterance = new SpeechSynthesisUtterance(`Terminus de la ligne, tous les voyageurs sont invités à descendre... à bientôt sur notre réseau !`);
+                   // utterance.lang='fr-FR';
+                    window.speechSynthesis.speak(utterance);
+            }
         }
 
         // Fonction pour calculer la distance entre deux points
