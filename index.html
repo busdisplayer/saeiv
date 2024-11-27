@@ -99,6 +99,7 @@
         var userMarker = L.marker([0, 0], {
             icon: L.divIcon({ className: 'blinking', html: '🚊' })
         }).addTo(map);
+        userMarker.bindPopup("CAF Urbos 3").openPopup();
 
         // Données des lignes et arrêts
         const lines = {
