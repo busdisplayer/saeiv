@@ -156,35 +156,27 @@ function displayLine(line) {
 }
 
 
-        function drawRoute(stops) {
-            if (stops.length < 2) return;
+      function drawRoute(stops) {
+    if (stops.length < 2) return;
 
-            // Création de la route
-            const coordinates = stops.map(stop => `${stop.lon},${stop.lat}`).join(';');
-            const url = `https://router.project-osrm.org/route/v1/cycling/${coordinates}?overview=full&geometries=geojson`;
+    // Supprimer l'ancienne couche si elle existe
+    if (window.routeLayer) {
+        map.removeLayer(window.routeLayer);
+    }
 
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    if (window.routeLayer) {
-                        map.removeLayer(window.routeLayer);
-                    }
+    // Extraire les coordonnées des arrêts (lat, lon)
+    const coordinates = stops.map(stop => [stop.lat, stop.lon]);
 
-                    const route = data.routes[0].geometry;
-                    window.routeLayer = L.geoJSON(route, {
-                        style: { color: 'blue', weight: 4, opacity: 0.7 }
-                    }).addTo(map);
+    // Ajouter une polyline pour relier les points
+    window.routeLayer = L.polyline(coordinates, {
+        color: 'green', // Couleur de la ligne
+        weight: 4,      // Épaisseur de la ligne
+        opacity: 0.7    // Transparence de la ligne
+    }).addTo(map);
 
-                    // Afficher la durée totale du trajet
-                    const duration = data.routes[0].duration;
-                    const distance = data.routes[0].distance;
-                    const hours = Math.floor(duration / 3600);
-                    const minutes = Math.floor((duration % 3600) / 60);
-                    console.log(`Temps estimé : ${hours} heures et ${minutes} minutes`);
-                    console.log(`Distance : ${distance} m`);
-                })
-                .catch(err => console.error('Erreur lors du calcul de l\'itinéraire : ', err));
-        }
+    console.log(`Route tracée avec ${coordinates.length} points.`);
+}
+
 
         // Sélection de la ligne
         document.getElementById('lineSelect').addEventListener('change', function () {
