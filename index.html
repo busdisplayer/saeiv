@@ -137,6 +137,8 @@
                 L.marker([stop.lat, stop.lon], {
                     icon: L.divIcon({ className: 'station-marker', html: '🚏 ' + stop.name })
                 }).addTo(map);
+                .bindPopup(stop.name);
+    
             });
             drawRoute(line);  // Modification pour passer la ligne directement
             updateNextStop();
