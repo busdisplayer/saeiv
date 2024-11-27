@@ -368,6 +368,9 @@ function startSpeech() {
         if (door.classList.contains('open')) {
             // Ajouter l'effet de clignotement
             door.classList.add('blinking');
+             const utterance = new SpeechSynthesisUtterance(`Fermeture automatique des portes, attention au redémarrage du véhicule !`);
+                    //utterance.lang='fr-FR';
+                    window.speechSynthesis.speak(utterance);
             
             // Attendre que le clignotement se termine avant de fermer les portes
             setTimeout(() => {
