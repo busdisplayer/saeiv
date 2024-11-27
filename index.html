@@ -158,79 +158,86 @@ function displayLine(line) {
     drawRoute(line);
 
     const lineCoords = line;
-     const trams = [];
-        const tramCount = 10; // Nombre de trams
-        const tramSpeed = 1000; // Vitesse de déplacement des trams (en millisecondes)
+    const trams = [];
+    const tramCount = 10; // Nombre de trams
+    const tramSpeed = 1000; // Vitesse de déplacement des trams (en millisecondes)
 
-        // Créer les trams
-        for (let i = 0; i < tramCount; i++) {
-            const startIndex = Math.floor(Math.random() * lineCoords.length); // Position de départ aléatoire
-            const tram = createTram(startIndex, i + 1); // Assigner un ID unique à chaque tram
-            trams.push({
-                marker: tram,
-                currentIndex: startIndex,
-                forward: true,
-                path: lineCoords // Contient la route complète
-            });
-        }
+    // Créer les trams
+    for (let i = 0; i < tramCount; i++) {
+        const startIndex = Math.floor(Math.random() * lineCoords.length); // Position de départ aléatoire
+        const tram = createTram(startIndex, i + 1); // Assigner un ID unique à chaque tram
+        trams.push({
+            marker: tram,
+            currentIndex: startIndex,
+            forward: true,
+            path: lineCoords // Contient la route complète
+        });
+    }
 
-        // Fonction pour créer un tram avec un popup
-        function createTram(startIndex, tramId) {
-            const tramMarker = L.marker(lineCoords[startIndex], {
-                icon: L.divIcon({
-                    className: 'tram-marker'
-                })
-            }).addTo(map);
+    // Fonction pour créer un tram avec un popup
+    function createTram(startIndex, tramId) {
+        const tramMarker = L.marker(lineCoords[startIndex], {
+            icon: L.divIcon({
+                className: 'tram-marker'
+            })
+        }).addTo(map);
 
-            // Ajouter un popup avec l'ID du tram
-            tramMarker.bindPopup(`<b>Tram ${tramId}</b><br>Arrêt : ${lineCoords[startIndex].lat}, ${lineCoords[startIndex].lon}`);
+        // Ajouter un popup avec l'ID du tram
+        tramMarker.bindPopup(`<b>Tram ${tramId}</b><br>Arrêt : ${lineCoords[startIndex].lat}, ${lineCoords[startIndex].lon}`);
 
-            return tramMarker;
-        }
+        return tramMarker;
+    }
 
-        // Fonction pour déplacer un tram de manière fluide le long de la ligne
-        function moveTrams() {
-            trams.forEach(tram => {
-                const currentStop = tram.path[tram.currentIndex];
-                let nextStopIndex = tram.forward ? tram.currentIndex + 1 : tram.currentIndex - 1;
-                if (nextStopIndex >= tram.path.length || nextStopIndex < 0) {
-                    tram.forward = !tram.forward; // Changer de direction
-                    nextStopIndex = tram.forward ? tram.currentIndex + 1 : tram.currentIndex - 1;
-                }
+    // Fonction pour déplacer un tram de manière fluide le long de la ligne
+    function moveTrams() {
+        trams.forEach(tram => {
+            const currentStop = tram.path[tram.currentIndex];
+            let nextStopIndex = tram.forward ? tram.currentIndex + 1 : tram.currentIndex - 1;
 
-                // Définir les positions actuelles et suivantes
-                const currentPos = currentStop;
-                const nextPos = tram.path[nextStopIndex];
+            if (nextStopIndex >= tram.path.length || nextStopIndex < 0) {
+                tram.forward = !tram.forward; // Changer de direction
+                nextStopIndex = tram.forward ? tram.currentIndex + 1 : tram.currentIndex - 1;
+            }
 
-                // Interpolation entre les deux positions pour un mouvement fluide
-                const latDiff = nextPos.lat - currentPos.lat;
-                const lonDiff = nextPos.lon - currentPos.lon;
-                const step = 0.1; // Vitesse de l'interpolation
+            // Définir les positions actuelles et suivantes
+            const currentPos = currentStop;
+            const nextPos = tram.path[nextStopIndex];
 
-                // Calcul de la nouvelle position du tram
-                const newLat = currentPos.lat + latDiff * step;
-                const newLon = currentPos.lon + lonDiff * step;
+            // Interpolation entre les deux positions pour un mouvement fluide
+            const latDiff = nextPos.lat - currentPos.lat;
+            const lonDiff = nextPos.lon - currentPos.lon;
+            const step = 0.5; // Augmenter la vitesse de l'interpolation
 
-                // Mise à jour de la position du tram
-                tram.marker.setLatLng([newLat, newLon]);
+            // Calcul de la nouvelle position du tram
+            const newLat = currentPos.lat + latDiff * step;
+            const newLon = currentPos.lon + lonDiff * step;
 
-                // Mise à jour de l'indice du tram
-                if (Math.abs(latDiff) < 0.0001 && Math.abs(lonDiff) < 0.0001) {
-                    tram.currentIndex = nextStopIndex; // Passer à l'arrêt suivant
-                }
+            // Mise à jour de la position du tram
+            tram.marker.setLatLng([newLat, newLon]);
 
-                // Mise à jour du popup avec la nouvelle position
-                tram.marker.setPopupContent(`<b>Tram ${trams.indexOf(tram) + 1}</b><br>Arrêt : ${newLat.toFixed(4)}, ${newLon.toFixed(4)}`);
-            });
-        }
+            // Mise à jour de l'indice du tram
+            if (Math.abs(latDiff) < 0.00001 && Math.abs(lonDiff) < 0.00001) {
+                tram.currentIndex = nextStopIndex; // Passer à l'arrêt suivant
+            }
 
-        // Démarrer l'animation des trams
-        setInterval(moveTrams, tramSpeed); // Déplacer les trams toutes les secondes
- 
+            // Mise à jour du popup avec la nouvelle position
+            tram.marker.setPopupContent(`<b>Tram ${trams.indexOf(tram) + 1}</b><br>Arrêt : ${newLat.toFixed(4)}, ${newLon.toFixed(4)}`);
+        });
+    }
+
+    // Fonction pour démarrer l'animation de manière fluide avec requestAnimationFrame
+    function animateTrams() {
+        moveTrams();
+        requestAnimationFrame(animateTrams); // Boucle d'animation fluide
+    }
+
+    // Démarrer l'animation des trams
+    animateTrams(); // Démarre la boucle d'animation
 
     // Mettre à jour l'arrêt suivant
     updateNextStop();
 }
+
 
 
       function drawRoute(stops) {
