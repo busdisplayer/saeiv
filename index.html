@@ -210,13 +210,18 @@
                 const distance = calculateDistance(lat, lon, nextStop.lat, nextStop.lon);
                 document.getElementById('distance').innerText = `Distance : ${Math.round(distance)} m`;
 
-                // Annonce vocale si à moins de 50 mètres
+                // Annonce vocale si à moins de 20 mètres
                 if (distance < 20) {
+                    if ((localStorage.getItem('lastsaid') ||'') !== nextStop.name) {
+                    playFrequency(700);
                     const utterance = new SpeechSynthesisUtterance(`Prochaine station ${nextStop.name}.`);
                    // utterance.lang='fr-FR';
                     window.speechSynthesis.speak(utterance);
+                    localStorage.setItem('lastsaid', nextStop.name);
+                    }
                 }
                  if (distance < 5) {
+                     playFrequency(800);
                     const utterance = new SpeechSynthesisUtterance(`Station : ${nextStop.name}.`);
                     // utterance.lang='fr-FR';
                     window.speechSynthesis.speak(utterance);
@@ -368,6 +373,8 @@ function startSpeech() {
         if (door.classList.contains('open')) {
             // Ajouter l'effet de clignotement
             door.classList.add('blinking');
+            playFrequency(500);
+            playFrequency(600);
              const utterance = new SpeechSynthesisUtterance(`Fermeture automatique des portes, attention au redémarrage du véhicule !`);
                     //utterance.lang='fr-FR';
                     window.speechSynthesis.speak(utterance);
@@ -376,6 +383,8 @@ function startSpeech() {
             setTimeout(() => {
                 door.classList.remove('blinking');
                 door.classList.remove('open');
+                playFrequency(500);
+                playFrequency(600);
             }, 3000); // 6 clignotements à 0.5s chacun = 3s
         } else {
             // Ouvrir les portes
@@ -432,7 +441,17 @@ function startSpeech() {
     // Initialisation au chargement de la page
     window.onload = updateBattery;
 </script>
-
+<script>
+  function playFrequency(frequency) {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    oscillator.type = 'sine'; // Type d'onde : 'sine', 'square', 'triangle', 'sawtooth'
+    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+    oscillator.connect(audioContext.destination);
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.25); // Durée de 1 seconde
+  }
+</script>
 </body>
 
 </html>
