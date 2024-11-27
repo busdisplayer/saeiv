@@ -175,37 +175,6 @@ function displayLine(line) {
     }).addTo(map);
 
     console.log(`Route tracée avec ${coordinates.length} points.`);
-          
-        const tramMarker = L.marker(lineCoords[0], {
-            icon: L.divIcon({
-                className: 'tram-marker'
-            })
-        }).addTo(map);
-
-        // Variables pour l'animation
-        let currentIndex = 0; // Indice de la position actuelle
-        let forward = true;  // Sens de déplacement (true = aller, false = retour)
-
-        // Fonction pour déplacer le tram le long de la ligne
-        function moveTram() {
-            if (forward) {
-                currentIndex++;
-                if (currentIndex >= stops.length - 1) {
-                    forward = false; // Demi-tour
-                }
-            } else {
-                currentIndex--;
-                if (currentIndex <= 0) {
-                    forward = true; // Retour à l'aller
-                }
-            }
-
-            // Mettre à jour la position du marqueur
-            tramMarker.setLatLng(stops[currentIndex]);
-        }
-
-        // Démarrer l'animation (toutes les 1 seconde)
-        setInterval(moveTram, 1000);
 }
 
 
