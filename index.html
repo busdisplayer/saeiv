@@ -130,18 +130,31 @@
         let currentStopIndex = 0;
 
         // Fonction pour afficher une ligne sur la carte
-        function displayLine(line) {
-            currentLine = line;
-            currentStopIndex = 0;
-            line.forEach(stop => {
-                L.marker([stop.lat, stop.lon], {
-                    icon: L.divIcon({ className: 'station-marker', html: '🚏 ' + stop.name })
-                }).addTo(map);
-                marker.bindPopup(stop.name);
-            });
-            drawRoute(line);  // Modification pour passer la ligne directement
-            updateNextStop();
-        }
+function displayLine(line) {
+    // Définir la ligne et réinitialiser l'index de l'arrêt courant
+    currentLine = line;
+    currentStopIndex = 0;
+
+    // Ajouter des marqueurs pour chaque arrêt
+    line.forEach(stop => {
+        const marker = L.marker([stop.lat, stop.lon], {
+            icon: L.divIcon({
+                className: 'station-marker',
+                html: '🚏 ' + stop.name
+            })
+        }).addTo(map);
+        
+        // Ajouter une popup au marqueur
+        marker.bindPopup(stop.name);
+    });
+
+    // Dessiner la route en reliant les arrêts
+    drawRoute(line);
+
+    // Mettre à jour l'arrêt suivant
+    updateNextStop();
+}
+
 
         function drawRoute(stops) {
             if (stops.length < 2) return;
