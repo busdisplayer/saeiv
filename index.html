@@ -216,7 +216,7 @@ function createTram(startIndex, tramId) {
     // Ajouter un popup avec l'ID du tram
     tramMarker.bindPopup(
         `<b>Tram ${tramId}</b><br>Arrêt : ${lineCoords[startIndex].lat}, ${lineCoords[startIndex].lon}`
-    ).openPopup();
+    );
 
     return tramMarker;
 }
