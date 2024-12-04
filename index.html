@@ -168,6 +168,7 @@ function displayLine(line) {
     // Définir la ligne et réinitialiser l'index de l'arrêt courant
     currentLine = line;
     currentStopIndex = 0;
+    trams = [];
 
     // Ajouter des marqueurs pour chaque arrêt
     line.forEach(stop => {
