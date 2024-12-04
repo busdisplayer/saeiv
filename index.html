@@ -403,7 +403,16 @@ function startSpeech() {
     <!-- Conteneur des boutons et des portes -->
 <div class="button-container">
     <!-- Bouton pour contacter le dépôt -->
-    <button class="w3-button w3-blue w3-round w3-large" onclick="alert('Contactez le dépôt via radio.');">
+    <div class="w3-bar">
+    <button class="w3-button w3-bar-item w3-blue w3-round w3-large" onclick="currentStopIndex++;">
+        Déviation de la prochaine station
+    </button>
+    <button class="w3-button w3-bar-item w3-blue w3-round w3-large" onclick="currentStopIndex--;">
+        Retour à la dernière station
+    </button>
+        </div>
+
+     <button class="w3-button w3-blue w3-round w3-large" onclick="alert('Contactez le dépôt via radio.');">
         CONTACTER DÉPÔT
     </button>
 
