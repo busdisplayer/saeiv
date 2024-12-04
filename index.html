@@ -213,7 +213,7 @@ function createTram(startIndex, tramId) {
         icon: L.divIcon({
             className: 'tram-marker',
             html: `<div class="tram-icon">${tramId}</div>`, // Style visuel du tram
-            iconSize: [30, 30], // Taille du tram
+            iconSize: [10, 10], // Taille du tram
             iconAnchor: [15, 15] // Point d'ancrage au centre
         })
     }).addTo(map);
@@ -278,7 +278,7 @@ style.innerHTML = `
         text-align: center;
     }
     .tram-icon {
-        background-color: #FF5733; /* Couleur du tram */
+        background-color: #007BFF; /* Couleur du tram */
         color: white;
         font-weight: bold;
         border-radius: 50%;
