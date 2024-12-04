@@ -216,7 +216,7 @@ function createTram(startIndex, tramId) {
     // Ajouter un popup avec l'ID du tram
     tramMarker.bindPopup(
         `<b>Tram ${tramId}</b><br>Arrêt : ${lineCoords[startIndex].lat}, ${lineCoords[startIndex].lon}`
-    );
+    ).openPopup();
 
     return tramMarker;
 }
@@ -252,7 +252,7 @@ function moveTrams() {
 
         // Mise à jour du popup avec les nouvelles coordonnées
         tram.marker.setPopupContent(
-            `<b>Tram ${trams.indexOf(tram) + 1}</b><br>Position : ${newLat.toFixed(4)}, ${newLon.toFixed(4)}`
+            `<b>Tram CAF Urbos 3 (n°90${trams.indexOf(tram) + 1})</b><br>Géoposition : ${newLat.toFixed(4)}, ${newLon.toFixed(4)}`
         );
     });
 }
